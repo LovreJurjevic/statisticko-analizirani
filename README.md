@@ -1,3 +1,7 @@
+## NAPOMENE
+- bmi nam ima tip varijable chr umjesto decimalni broj. Potrebno je pripazit da se bmi ne prikaze kao kategoricni podatak nego neka kontnuirana vrijednost
+
+## ZADANA PITANJA
 ### Pitanje 1 (izracunato, treba napisati tekst i napraviti dijagrame)
 Postoji li statisticki znacajna razlika u prosjecnoj razini glukoze izmedu pacijenata sa i
 bez mozdanog udara?

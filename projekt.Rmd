@@ -30,10 +30,20 @@ Prikupljeni skup podataka sadrži kliničke podatke o pacijentima i informacije 
 -   smoking_status: opis pacijentovog odnosa s pušenjem cigareta (formerly smoked, never smoked, smokes, Unknown)
 -   stroke: oznaka koja daje informaciju je li pacijent doživio moždani udar (0, 1)
 
+### Učitavanje i pregled podataka
+
 ```{r}
 data <- read.csv("data.csv")
-summary(data$avg_glucose_level)
+head(data)
 ```
+```{r}
+str(data)
+```
+
+
+
+
+### Postoji li statistički značajna razlika u prosječnoj razini glukoze između pacijenata sa i bez moždanog udara?
 
 ```{r}
 data_stroke <- data[data$stroke == 1, ]$avg_glucose_level
