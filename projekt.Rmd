@@ -4,6 +4,8 @@ author: "Statistički Analizirani"
 date: "2025-12-10"
 output:
   pdf_document: default
+  html_document:
+    df_print: paged
 ---
 
 ```{r setup, include=FALSE}
@@ -55,6 +57,26 @@ barplot(table(data$ever_married), main = "Distribucija bracnog statusa", xlab = 
 
 ```
 
+```{r}
+summary(data$age)
+prop.table(table(data$gender, useNA = "ifany"))
+prop.table(table(data$ever_married, useNA = "ifany"))
+```
+
+Distribucija dobi ispitanika blago je zakrivljena u lijevo. Prosječan broj godina pacijenta iznosi 43.23 godine, a njihov raspon je razlika između 82 godine i 0.08 godina. Dakle, zastupljene su gotovo sve dobne skupine te nema bitnih odstupanja.
+
+Broj ženskih ispitanih pacijenata je neočekivano velik u odnosu na muške ispitanike. Pacijentice zauzimaju čak 58.6% skupa podataka.
+
+Većina ispitanika je u svom životu bar jednom stupila u brak.
+
+```{r}
+boxplot(data$age,
+main = "Boxplot (dob)",
+ylab = "Dob",
+col = "aquamarine",
+cex.main = 1.5, cex.lab = 1.2)
+```
+
 #### Prikaz zdravstvenih podataka
 
 Kao što je prethodno navedeno, potrebno je pripremiti atribut bmi.
@@ -69,23 +91,104 @@ bmi <- as.numeric(bmi)
 ```
 
 ```{r}
-par(mfrow = c(2,2))
+par(mfrow = c(1,2))
 barplot(table(data$hypertension), main = "Distribucija hipertenzije", xlab = "Hipertenzija", col = c("orange","lightblue"),border="black")
 barplot(table(data$heart_disease), main = "Distribucija srcanih bolesti", xlab = "Srcane bolesti", col = c("orange","lightblue"),border="black")
-hist(data$avg_glucose_level , main = "Distribucija kolicine glukoze u krvi", xlab = "Kolicina glukoze u krvi [mg/dL]", col = "lightblue", border = "black")
-hist(bmi , main = "Distribucija indeksa BMI", xlab = "BMI", col = "lightblue", border = "black")
 
 ```
+
+```{r}
+young_with_hypertension <- data[data$age<=median(data$age),]$hypertension
+old_with_hypertension <- data[data$age>=median(data$age),]$hypertension
+
+list(
+    overall_mean = mean(data$hypertension),
+    young_mean   = mean(young_with_hypertension),
+    old_mean     = mean(old_with_hypertension)
+  )
+```
+
+U skupu podataka 9.7% ispitanika ima hipertenziju, međutim ona jako ovisi o dobi ispitanika. Ako uzmemo samo ispitanike starije od medijana skupa, ta brojka postane 17.1%
+
+```{r}
+young_with_heart_disease <- data[data$age<=median(data$age),]$heart_disease
+old_with_heart_disease <- data[data$age>=median(data$age),]$heart_disease
+
+list(
+    overall_mean = mean(data$heart_disease),
+    young_mean   = mean(young_with_heart_disease),
+    old_mean     = mean(old_with_heart_disease)
+  )
+```
+
+Sličan rezultat se dobije i sa srčanim bolestima, gdje u uzorku srčanu bolest ima oko 5.4% dok stariji dio uzorka ima 10.4%
+
+```{r}
+par(mfrow = c(1,2))
+hist(data$avg_glucose_level , main = "Distribucija kolicine glukoze u krvi", xlab = "Kolicina glukoze u krvi [mg/dL]", col = "lavender", border = "black")
+hist(bmi , main = "Distribucija indeksa BMI", xlab = "BMI", col = "aquamarine", border = "black")
+```
+
+```{r}
+summary(data$avg_glucose_level)
+summary(bmi)
+```
+
+```{r}
+par(mfrow = c(1,2))
+boxplot(data$avg_glucose_level,
+main = "Boxplot (razina glukoze)",
+ylab = "Razina glukoze",
+col = "aquamarine",
+cex.main = 1.5, cex.lab = 1.2)
+boxplot(bmi,
+main = "Boxplot (bmi)",
+ylab = "BMI",
+col = "lavender",
+cex.main = 1.5, cex.lab = 1.2)
+
+```
+
+Distribucije atributa vezanih uz razinu glukoze u krvi te BMI imaju sličnost u tome da postoje stršeće vrijednosti. Međutim, razina glukoze krvi je više zakrivljena i to se da očitati iz broja stršećih vrijednosti, ali i pomaka crte medijana u interkvartalnom intervalu.
+
+Nijedna od ove dvije distribucije se ne može smatrati savršeno normalnom.
 
 #### Prikaz podataka o životnim navikama
 
 ```{r}
-par(mfrow = c(2,2))
 barplot(table(data$smoking_status), main = "Distribucija statusa pusenja", xlab = "Status pusenja", col = c("orange","lightblue","yellow","lavender"),border="black")
+```
+
+```{r}
+prop.table(table(data$smoking_status, useNA = "ifany"))
+```
+
+Vidljivo je da za veliki postotak ispitanika, čak preko 30%, nemamo informaciju o njihovom statusu pušenja. Važno je napomenuti da se izbacivanjem zapisa o pacijentima sa statusom pušenja "Unknown" zapravo izbacuju gotovo sva djeca iz skupa podataka. Ipak, u skupu pacijenata s "Unknown" statusom pušenja postoje predstavnici gotovo svih dobnih skupina. Sljedeći histogram prikazuje distribuciju dobi "Unknown" pušača.
+
+```{r}
+hist(data[data$smoking_status == "Unknown",]$age , main = "Distribucija dobi 'Unknown pusaca'", xlab = "Dob", col = "lightblue", border = "black")
+```
+
+```{r}
+par(mfrow = c(1,2))
 barplot(table(data$work_type), main = "Distribucija tipa zaposlenja", xlab = "Tip zaposlenja", col = c("orange","lightblue","yellow","lavender","aquamarine"),border="black")
 barplot(table(data$Residence_type), main = "Distribucija tipa prebivališta", xlab = "Tip prebivališta", col = c("orange","lightblue","yellow","lavender"),border="black")
-
 ```
+
+```{r}
+prop.table(table(data$work_type, useNA = "ifany"))
+prop.table(table(data$Residence_type, useNA = "ifany"))
+```
+
+Većina pacijenata je zaposlena u privatnom sektoru, dok 0,4% njih nikada nije radilo.
+
+Raspodjela između urbane i ruralne sredine u kojoj živi pacijent je gotovo jednolika
+
+```{r}
+mean(data$stroke)
+```
+
+U nastavku rada nastojat će se pokazati povezanost opisanih atributa s moždanim udarom. Uz pomoć statističkih testova nastojat će se zaključiti o tome kako i s kolikom uspješnosti je moguće prepoznati rizik od moždanog udara kod pojedine osobe.
 
 ### Postoji li statistički značajna razlika u prosječnoj razini glukoze između pacijenata sa i bez moždanog udara?
 
@@ -165,8 +268,7 @@ table(anova_data$hypertension, anova_data$heart_disease)
 
 Broj opažanja nakon izbacivanja nedostajućih vrijednosti daje nam efektivnu veličinu uzorka za ovu analizu.
 
-Ukupno je u analizi sudjelovalo 4 909 ispitanika.\
-Raspodjela prema prisutnosti hipertenzije i srčane bolesti je sljedeća:
+Ukupno je u analizi sudjelovalo 4909 ispitanika. Raspodjela prema prisutnosti hipertenzije i srčane bolesti je sljedeća:
 
 -   nema hipertenziju, nema srčanu bolest: **87.0 %**
 -   nema hipertenziju, ima srčanu bolest: **3.8 %**
@@ -201,7 +303,7 @@ Promatramo li postotke unutar razina srčane bolesti:
 head(anova_data)
 ```
 
-## Sredine po grupama (da znaš što zapravo znači rezultat)
+## Sredine po grupama
 
 Najprije izračunavamo prosječne vrijednosti BMI-ja po svakoj kombinaciji hipertenzije i srčane bolesti te ih vizualiziramo.
 
@@ -295,11 +397,9 @@ Iz tablice prosječnih BMI vrijednosti po grupama vidimo da je najviši BMI tipi
 
 ### Postoji li povezanost izmedu statusa pušenja i nastanka moždanog udara?
 
-U analizi se ispituje postoji li povezanost između statusa pušenja i pojave moždanog udara.
-Prvo se varijable smoking_status i stroke pretvaraju u faktore kako bi se mogle ispravno koristiti u kontingencijskoj tablici i Chi-kvadrat testu.
+U analizi se ispituje postoji li povezanost između statusa pušenja i pojave moždanog udara. Prvo se varijable smoking_status i stroke pretvaraju u faktore kako bi se mogle ispravno koristiti u kontingencijskoj tablici i Chi-kvadrat testu.
 
 Zatim se formira kontingencijska tablica za tri kategorije pušenja (bez Unknown) kako bi se izbjegla izobličenja u rezultatima.
-
 
 ## Postotak moždanih udara po kategorijama pušenja
 
@@ -330,21 +430,19 @@ barplot(t(prop_tab),
 
 ```
 
-
-
 ## Chi-kvadrat test – osnovna tablica
 
 U ovom dijelu analiziramo odnos između statusa pušenja i pojave moždanog udara. Nakon čišćenja podataka kreirana je kontingencijska tablica koja uključuje tri kategorije pušenja: never smoked, formerly smoked i smokes (kategorija Unknown je uklonjena).
 
 Na temelju ove tablice proveden je Chi-kvadrat test neovisnosti kako bi se provjerilo postoji li statistički značajna povezanost između statusa pušenja i moždanog udara. Test vraća vrijednost statistike, stupnjeve slobode i p-vrijednost. Ako je p-vrijednost manja od 0.05, odbacujemo hipotezu o neovisnosti i zaključujemo da je status pušenja povezan s pojavom moždanog udara.
 
-Uz to se pregledavaju i očekivane frekvencije kako bismo provjerili jesu li zadovoljeni uvjeti za ispravno provođenje Chi-kvadrat testa (svaka očekivana frekvencija > 5). Ovaj test pruža osnovni uvid u to razlikuju li se skupine pušača u učestalosti moždanog udara.
+Uz to se pregledavaju i očekivane frekvencije kako bismo provjerili jesu li zadovoljeni uvjeti za ispravno provođenje Chi-kvadrat testa (svaka očekivana frekvencija \> 5). Ovaj test pruža osnovni uvid u to razlikuju li se skupine pušača u učestalosti moždanog udara.
 
 Hipoteze:
 
-- H0: Status pušenja nije povezan s pojavom moždanog udara (neovisne su varijable).
+-   H0: Status pušenja nije povezan s pojavom moždanog udara (neovisne su varijable).
 
-- H1: Status pušenja je povezan s pojavom moždanog udara (varijable nisu neovisne).
+-   H1: Status pušenja je povezan s pojavom moždanog udara (varijable nisu neovisne).
 
 ```{r}
 
@@ -364,6 +462,7 @@ chi_rezultat
 
 chi_rezultat$expected
 ```
+
 U nastavku je prikazan barplot koji vizualno predstavlja povezanost između statusa pušenja i pojave moždanog udara. Svaka skupina pušačkog statusa (never smoked, formerly smoked, smokes) prikazana je s pripadnim brojem osoba koje su doživjele ili nisu doživjele moždani udar.
 
 ```{r}
@@ -377,30 +476,27 @@ barplot(tablica,
         ylab = "Broj pacijenata")
 ```
 
-Kontingencijska tablica uključivala je tri kategorije pušenja: never smoked, formerly smoked i smokes. Chi-kvadrat test neovisnosti pokazao je p-vrijednost manju od 0.05, što znači da postoji statistički značajna povezanost između statusa pušenja i moždanog udara. Očekivane frekvencije su bile zadovoljavajuće (>5), što potvrđuje valjanost testa.
-
+Kontingencijska tablica uključivala je tri kategorije pušenja: never smoked, formerly smoked i smokes. Chi-kvadrat test neovisnosti pokazao je p-vrijednost manju od 0.05, što znači da postoji statistički značajna povezanost između statusa pušenja i moždanog udara. Očekivane frekvencije su bile zadovoljavajuće (\>5), što potvrđuje valjanost testa.
 
 ## Spajanje kategorija – bivši i sadašnji pušači vs. nikad pušili
 
 U drugom pristupu spajaju se kategorije formerly smoked i smokes u jednu zajedničku skupinu nazvanu „was smoking/smokes“. Time se formiraju dvije jasne skupine:
 
-1. Osobe koje nikada nisu pušile (never smoked)
+1.  Osobe koje nikada nisu pušile (never smoked)
 
-2. Osobe koje su pušile, bez obzira na to puše li trenutno ili su prestale (was smoking/smokes)
+2.  Osobe koje su pušile, bez obzira na to puše li trenutno ili su prestale (was smoking/smokes)
 
-Ovakva podjela omogućuje ispitivanje temeljnog pitanja:
-Je li bilo kakva povijest pušenja povezana s pojavom moždanog udara?
+Ovakva podjela omogućuje ispitivanje temeljnog pitanja: Je li bilo kakva povijest pušenja povezana s pojavom moždanog udara?
 
-Nakon formiranja nove tablice provodi se Chi-kvadrat test neovisnosti kako bi se provjerilo razlikuje li se učestalost moždanog udara između ove dvije skupine. Ako je dobivena p-vrijednost statistički značajna (p < 0.05), zaključujemo da postoji povezanost između povijesti pušenja i rizika moždanog udara.
+Nakon formiranja nove tablice provodi se Chi-kvadrat test neovisnosti kako bi se provjerilo razlikuje li se učestalost moždanog udara između ove dvije skupine. Ako je dobivena p-vrijednost statistički značajna (p \< 0.05), zaključujemo da postoji povezanost između povijesti pušenja i rizika moždanog udara.
 
 Uz test izrađen je i barplot koji grafički prikazuje raspodjelu moždanog udara u dvjema skupinama. Vizualizacija dodatno olakšava uočavanje eventualnih razlika između osoba koje nikad nisu pušile i onih koje su pušile barem jednom u životu.
 
 Hipoteze:
 
-- H0: Povijest pušenja (nikad vs. ikad) nije povezana s pojavom moždanog udara.
+-   H0: Povijest pušenja (nikad vs. ikad) nije povezana s pojavom moždanog udara.
 
-- H1: Povijest pušenja (nikad vs. ikad) jest povezana s pojavom moždanog udara.
-
+-   H1: Povijest pušenja (nikad vs. ikad) jest povezana s pojavom moždanog udara.
 
 ```{r}
 
@@ -434,6 +530,7 @@ chi_rezultat
 chi_rezultat$expected
 
 ```
+
 ```{r}
 barplot(nova_tablica,
         beside = TRUE,                 
@@ -445,4 +542,3 @@ barplot(nova_tablica,
 ```
 
 Kombinirane su kategorije formerly smoked i smokes u jednu skupinu „was smoking/smokes“, a druga skupina su osobe koje nikada nisu pušile. Chi-kvadrat test na ovoj dvodijelnoj tablici također je dao p-vrijednost manju od 0.05, što potvrđuje statistički značajnu razliku u učestalosti moždanog udara između osoba koje nikada nisu pušile i onih koje su ikada pušile (trenutno ili prije).
-
