@@ -1,5 +1,5 @@
 ## NAPOMENE
-- bmi nam ima tip varijable chr umjesto decimalni broj. Potrebno je pripazit da se bmi ne prikaze kao kategoricni podatak nego neka kontnuirana vrijednost
+- bmi ima tip varijable chr umjesto decimalni broj. Potrebno je pripazit da se bmi ne prikaze kao kategoricni podatak nego kao kontinuirana vrijednost (mozemo odmah pri ucitavanju podataka to popravit ako to nece izbrisat neke redove)
 
 ## ZADANA PITANJA
 ### Pitanje 1 (izracunato, treba napisati tekst i napraviti dijagrame)
