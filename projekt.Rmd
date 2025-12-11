@@ -292,3 +292,157 @@ Na temelju ANOVA tablice zaključujemo sljedeće:
 -   Interakcijski učinak hipertenzije i srčanih bolesti na BMI je statistički značajan (p \< 0.01), zbog čega zaključujemo da se učinak hipertenzije na BMI razlikuje ovisno o tome ima li osoba srčanu bolest.
 
 Iz tablice prosječnih BMI vrijednosti po grupama vidimo da je najviši BMI tipično prisutan kod osoba koje imaju i hipertenziju i srčanu bolest, dok je najniži BMI kod osoba koje nemaju ni hipertenziju ni srčanu bolest.
+
+### Postoji li povezanost izmedu statusa pušenja i nastanka moždanog udara?
+
+U analizi se ispituje postoji li povezanost između statusa pušenja i pojave moždanog udara.
+Prvo se varijable smoking_status i stroke pretvaraju u faktore kako bi se mogle ispravno koristiti u kontingencijskoj tablici i Chi-kvadrat testu.
+
+Zatim se formira kontingencijska tablica za tri kategorije pušenja (bez Unknown) kako bi se izbjegla izobličenja u rezultatima.
+
+
+## Postotak moždanih udara po kategorijama pušenja
+
+Kako bismo bolje razumjeli učestalost moždanog udara unutar svake skupine pušačkog statusa, izrađen je barplot koji prikazuje proporciju pacijenata s moždanim udarom u odnosu na ukupni broj osoba unutar svake kategorije pušenja.
+
+Iz grafa se može jasno vidjeti u kojoj skupini je udio moždanih udara najveći, što dodatno nadopunjuje statistički rezultat Chi-kvadrat testa.
+
+```{r}
+# Proporcije moždanih udara unutar svake kategorije pušenja
+# Redovi: status pušenja, stupci: stroke (0/1)
+data$smoking_status <- as.factor(data$smoking_status)
+data$stroke <- as.factor(data$stroke)
+
+tablica <- table(data$smoking_status, data$stroke)
+tablica <- tablica[-4, ]  # uklanjamo 'Unknown'
+
+prop_tab <- prop.table(tablica, 1)  # row-wise proportions
+
+# Barplot – prikaz proporcija
+barplot(t(prop_tab),
+        beside = TRUE,                  # stupci jedan do drugog
+        legend = TRUE,                  # legenda za stroke 0/1
+        col = c("skyblue", "orange"),   # boje za stroke 0 i 1
+        main = "Postotak moždanih udara po kategorijama pušenja",
+        xlab = "Status pušenja",
+        ylab = "Proporcija pacijenata",
+        ylim = c(0,1))                  # proporcija od 0 do 1
+
+```
+
+
+
+## Chi-kvadrat test – osnovna tablica
+
+U ovom dijelu analiziramo odnos između statusa pušenja i pojave moždanog udara. Nakon čišćenja podataka kreirana je kontingencijska tablica koja uključuje tri kategorije pušenja: never smoked, formerly smoked i smokes (kategorija Unknown je uklonjena).
+
+Na temelju ove tablice proveden je Chi-kvadrat test neovisnosti kako bi se provjerilo postoji li statistički značajna povezanost između statusa pušenja i moždanog udara. Test vraća vrijednost statistike, stupnjeve slobode i p-vrijednost. Ako je p-vrijednost manja od 0.05, odbacujemo hipotezu o neovisnosti i zaključujemo da je status pušenja povezan s pojavom moždanog udara.
+
+Uz to se pregledavaju i očekivane frekvencije kako bismo provjerili jesu li zadovoljeni uvjeti za ispravno provođenje Chi-kvadrat testa (svaka očekivana frekvencija > 5). Ovaj test pruža osnovni uvid u to razlikuju li se skupine pušača u učestalosti moždanog udara.
+
+Hipoteze:
+
+- H0: Status pušenja nije povezan s pojavom moždanog udara (neovisne su varijable).
+
+- H1: Status pušenja je povezan s pojavom moždanog udara (varijable nisu neovisne).
+
+```{r}
+
+# Čišćenje: pretvaranje smoking_status u faktor
+data$smoking_status <- as.factor(data$smoking_status)
+data$stroke <- as.factor(data$stroke)
+
+# Kontingencijska tablica
+tablica <- table(data$smoking_status, data$stroke)
+tablica <- tablica[-4, ]
+tablica
+
+# Chi-square test
+chi_rezultat <- chisq.test(tablica)
+chi_rezultat
+
+
+chi_rezultat$expected
+```
+U nastavku je prikazan barplot koji vizualno predstavlja povezanost između statusa pušenja i pojave moždanog udara. Svaka skupina pušačkog statusa (never smoked, formerly smoked, smokes) prikazana je s pripadnim brojem osoba koje su doživjele ili nisu doživjele moždani udar.
+
+```{r}
+# Barplot – odnos pušenja i moždanog udara (osnovna tablica)
+barplot(tablica,
+        beside = TRUE,
+        legend = TRUE,
+        col = c("skyblue", "orange", "lightgreen"),
+        main = "Povezanost pušenja i moždanog udara",
+        xlab = "Status pušenja",
+        ylab = "Broj pacijenata")
+```
+
+Kontingencijska tablica uključivala je tri kategorije pušenja: never smoked, formerly smoked i smokes. Chi-kvadrat test neovisnosti pokazao je p-vrijednost manju od 0.05, što znači da postoji statistički značajna povezanost između statusa pušenja i moždanog udara. Očekivane frekvencije su bile zadovoljavajuće (>5), što potvrđuje valjanost testa.
+
+
+## Spajanje kategorija – bivši i sadašnji pušači vs. nikad pušili
+
+U drugom pristupu spajaju se kategorije formerly smoked i smokes u jednu zajedničku skupinu nazvanu „was smoking/smokes“. Time se formiraju dvije jasne skupine:
+
+1. Osobe koje nikada nisu pušile (never smoked)
+
+2. Osobe koje su pušile, bez obzira na to puše li trenutno ili su prestale (was smoking/smokes)
+
+Ovakva podjela omogućuje ispitivanje temeljnog pitanja:
+Je li bilo kakva povijest pušenja povezana s pojavom moždanog udara?
+
+Nakon formiranja nove tablice provodi se Chi-kvadrat test neovisnosti kako bi se provjerilo razlikuje li se učestalost moždanog udara između ove dvije skupine. Ako je dobivena p-vrijednost statistički značajna (p < 0.05), zaključujemo da postoji povezanost između povijesti pušenja i rizika moždanog udara.
+
+Uz test izrađen je i barplot koji grafički prikazuje raspodjelu moždanog udara u dvjema skupinama. Vizualizacija dodatno olakšava uočavanje eventualnih razlika između osoba koje nikad nisu pušile i onih koje su pušile barem jednom u životu.
+
+Hipoteze:
+
+- H0: Povijest pušenja (nikad vs. ikad) nije povezana s pojavom moždanog udara.
+
+- H1: Povijest pušenja (nikad vs. ikad) jest povezana s pojavom moždanog udara.
+
+
+```{r}
+
+# Kreiranje nove tablice: spajamo kategorije 'formerly smoked' i 'smokes'
+nova_tablica <- table(data$smoking_status, data$stroke)
+
+# Uklanjamo kategoriju 'Unknown' jer nema korisne informacije
+nova_tablica <- nova_tablica[-4, ]
+
+# Spajamo redove: formerly smoked + smokes
+# (to znači da gledamo osobe koje su ikada pušile – trenutno ili ranije)
+nova_tablica[2,] <- nova_tablica[2, ] + nova_tablica[3, ]
+
+# Brišemo sada već spojen treći red
+nova_tablica <- nova_tablica[-3, ]
+
+# Preimenujemo redove radi jasnijeg prikaza
+rownames(nova_tablica)[1] <- "never smoked"        # nikad nisu pušili
+rownames(nova_tablica)[2] <- "was smoking/smokes"  # ikad pušili (prije ili sada)
+
+# Prikaz nove tablice nakon spajanja
+nova_tablica
+
+# Chi-kvadrat test za provjeru povezanosti između pušenja (nikad vs. ikad) i moždanog udara
+# Ako je p-vrijednost < 0.05 → postoji statistička povezanost između pušenja i moždanog udara
+chi_rezultat <- chisq.test(nova_tablica)
+
+# Ispis rezultata testa
+chi_rezultat
+
+chi_rezultat$expected
+
+```
+```{r}
+barplot(nova_tablica,
+        beside = TRUE,                 
+        legend = TRUE,                 
+        col = c("orange", "lightgreen"),
+        main = "Moždani udar prema povijesti pušenja",
+        xlab = "Status pušenja",
+        ylab = "Broj pacijenata")
+```
+
+Kombinirane su kategorije formerly smoked i smokes u jednu skupinu „was smoking/smokes“, a druga skupina su osobe koje nikada nisu pušile. Chi-kvadrat test na ovoj dvodijelnoj tablici također je dao p-vrijednost manju od 0.05, što potvrđuje statistički značajnu razliku u učestalosti moždanog udara između osoba koje nikada nisu pušile i onih koje su ikada pušile (trenutno ili prije).
+
