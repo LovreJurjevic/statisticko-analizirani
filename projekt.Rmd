@@ -1,8 +1,10 @@
 ---
 title: "SAP Projekt"
-author: "Lovre Jurjević"
+author: "Statistički Analizirani"
 date: "2025-12-10"
-output: html_document
+output:
+  html_document: default
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -36,12 +38,54 @@ Prikupljeni skup podataka sadrži kliničke podatke o pacijentima i informacije 
 data <- read.csv("data.csv")
 head(data)
 ```
+
 ```{r}
 str(data)
 ```
 
+Iz generiranih prikaza moguće je vidjeti neke od vrijednosti koje poprimaju pojedini atributi vezani uz pacijenta, ali i tip podataka koji prikazuju. Primjetljivo je kako se atribut bmi vodi kao niz znakova iako semantički predstavlja decimalni broj. Pri izradi dijagrama i u budućim računima potrebno je pripaziti da se bmi ne prikaže kao kategorični atribut.
 
+#### Prikaz demografskih podataka
 
+```{r}
+par(mfrow = c(1,3))
+hist(data$age , main = "Distribucija dobi", xlab = "Dob", col = "lightblue", border = "black")
+barplot(table(data$gender), main = "Distribucija spola", xlab = "Spol", col = c("pink","lightblue","black"),border="black")
+barplot(table(data$ever_married), main = "Distribucija bracnog statusa", xlab = "Bracni status", col = c("orange","lightblue"),border="black")
+
+```
+
+#### Prikaz zdravstvenih podataka
+
+Kao što je prethodno navedeno, potrebno je pripremiti atribut bmi.
+
+```{r}
+
+bmi<-data$bmi
+
+bmi[bmi == "N/A"] <- NA
+bmi <- as.numeric(bmi)
+
+```
+
+```{r}
+par(mfrow = c(2,2))
+barplot(table(data$hypertension), main = "Distribucija hipertenzije", xlab = "Hipertenzija", col = c("orange","lightblue"),border="black")
+barplot(table(data$heart_disease), main = "Distribucija srcanih bolesti", xlab = "Srcane bolesti", col = c("orange","lightblue"),border="black")
+hist(data$avg_glucose_level , main = "Distribucija kolicine glukoze u krvi", xlab = "Kolicina glukoze u krvi [mg/dL]", col = "lightblue", border = "black")
+hist(bmi , main = "Distribucija indeksa BMI", xlab = "BMI", col = "lightblue", border = "black")
+
+```
+
+#### Prikaz podataka o životnim navikama
+
+```{r}
+par(mfrow = c(2,2))
+barplot(table(data$smoking_status), main = "Distribucija statusa pusenja", xlab = "Status pusenja", col = c("orange","lightblue","yellow","lavender"),border="black")
+barplot(table(data$work_type), main = "Distribucija tipa zaposlenja", xlab = "Tip zaposlenja", col = c("orange","lightblue","yellow","lavender","aquamarine"),border="black")
+barplot(table(data$Residence_type), main = "Distribucija tipa prebivališta", xlab = "Tip prebivališta", col = c("orange","lightblue","yellow","lavender"),border="black")
+
+```
 
 ### Postoji li statistički značajna razlika u prosječnoj razini glukoze između pacijenata sa i bez moždanog udara?
 
