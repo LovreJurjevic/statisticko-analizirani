@@ -9,7 +9,7 @@
 Postoji li statisticki znacajna razlika u prosjecnoj razini glukoze izmedu pacijenata sa i
 bez mozdanog udara?
 
-### Pitanje 2 (izracunato, Kizo treba pushat i svi trebamo skuzit o cemu se zapravo radi)
+### Pitanje 2 (Pushano, ali treba jos proucit jer je novo gradivo i pregledat tekst ako ko ima zamjerki)
 Postoji li interakcijski ucinak hipertenzije i srcanih bolesti na BMI?
 
 ### Pitanje 3 (navodno logisticka regresija)
