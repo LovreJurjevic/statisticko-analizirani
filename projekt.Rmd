@@ -49,7 +49,7 @@ curve(dnorm(x, mean(data$avg_glucose_level), sd(data$avg_glucose_level)), add = 
 ```
 
 ```{r}
-set.seed(123)
+set.seed(67)
 
 B <- 10000
 
@@ -69,7 +69,6 @@ ci <- quantile(boot_diff, c(0.025, 0.975))
 
 list(
   observed_mean_difference = obs_diff,
-  p_value = p_value,
   ci_95 = ci
 )
 
