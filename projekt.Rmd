@@ -408,7 +408,336 @@ Na temelju ANOVA tablice zaključujemo sljedeće:
 
 Iz tablice prosječnih BMI vrijednosti po grupama vidimo da je najviši BMI tipično prisutan kod osoba koje imaju i hipertenziju i srčanu bolest, dok je najniži BMI kod osoba koje nemaju ni hipertenziju ni srčanu bolest.
 
-### Postoji li povezanost izmedu statusa pušenja i nastanka moždanog udara?
+## Možemo li predvidjeti vjerojatnost moždanog udara iz dobi, glukoze, BMI-ja i hipertenzije?
+
+U ovom istraživačkom pitanju želimo ispitati možemo li na temelju dobi (age), prosječne razine glukoze u krvi (avg_glucose_level), indeksa tjelesne mase (BMI) i prisutnosti hipertenzije (hypertension) predvidjeti vjerojatnost da je pacijent doživio moždani udar (stroke).
+
+Pošto uzmimamo moždani kao binarnu varijablu (0 = nema moždanog udara, 1 = imao moždani udar), koristimo logističku regresiju kao provjeru i test za ovo pitanje. Logistički model nam daje procjenu:
+
+#### 𝑃 ( moždani = 1 \| age , glucose , BMI , hypertension )
+
+odnosno ovo predstavlja samu vjerojatnost da pacijent ima moždani udar.
+
+Za model uzimamo samo potrebne varijable te izbacujemo retke s nedostajućim vrijednostima kako bi model radio bez problema:
+
+```{r}
+model_data <- data[, c("stroke", "age", "avg_glucose_level", "bmi", "hypertension")]
+
+# nedostajuće BMI vrijednosti -> NA
+
+model_data$bmi[model_data$bmi == "N/A"] <- NA
+
+# pretvaranje BMI u numeričku varijablu
+
+model_data$bmi <- as.numeric(model_data$bmi)
+
+# izbacujemo redove s NA
+
+model_data <- na.omit(model_data)
+
+# faktorizacija radi preglednosti
+
+model_data$stroke <- factor(model_data$stroke, levels = c(0, 1),
+labels = c("no_stroke", "stroke"))
+model_data$hypertension <- factor(model_data$hypertension, levels = c(0, 1),
+labels = c("no_hypertension", "has_hypertension"))
+
+nrow(model_data)
+table(model_data$stroke)
+
+```
+
+Od ukupno 5110 pacijenata, **4909** opažanja ima sve potrebne podatke za model (dob, glukoza, BMI, hipertenzija i ishod moždanog udara).\
+Od tih 4909 pacijenata, 209 je doživjelo moždani udar, a 4700 nije – dakle skup je **jako neuravnotežen**, što je tipično za rijetke događaje.
+
+Kratka usporedba distribucija prediktora po ishodu:
+
+```{r}
+# Boxplotovi prediktora po ishodu moždanog udara
+
+par(mfrow = c(1, 3))
+boxplot(age ~ stroke, data = model_data,
+main = "Dob po ishodu",
+xlab = "Ishod", ylab = "Dob",
+col = c("lightblue","orange"))
+
+boxplot(avg_glucose_level ~ stroke, data = model_data,
+main = "Glukoza po ishodu",
+xlab = "Ishod", ylab = "Prosj. glukoza [mg/dL]",
+col = c("lightblue","orange"))
+
+boxplot(bmi ~ stroke, data = model_data,
+main = "BMI po ishodu",
+xlab = "Ishod", ylab = "BMI",
+col = c("lightblue","orange"))
+
+par(mfrow = c(1,1))
+
+
+```
+
+Iz ovih grafova se već može naslutiti da su **osobe sa moždanim udarom u prosjeku starije** i imaju **višu razinu glukoze**, dok se BMI čini manje izrazito različitim.
+
+### Izgradnja logističkog modela
+
+Logistička regresija:
+
+```{r}
+logreg_model <- glm(stroke ~ age + avg_glucose_level + bmi + hypertension,
+data = model_data,
+family = binomial)
+
+summary(logreg_model)
+
+```
+
+Na temelju sažetka modela:
+
+-   **Godine (age)-** koeficijent je pozitivan i visoko statistički značajan (**p \< 0.001**). Stariji pacijenti imaju **veći rizik moždanog udara**.
+
+-   **Prosječna razina glukoze u krvi (avg_glucose_level)-** pozitivan i statistički značajan koeficijent (**p \< 0.001**). Viša razina glukoze u krvi je povezana s **povećanim rizikom moždanog udara**.
+
+-   **Hipertenzija (hypertension)-** pozitivan i statistički značajan koeficijent (p ≈ 0.002). Pacijenti s hipertenzijom imaju **viši rizik moždanog udara** u odnosu na one bez hipertenzije, čak i nakon kontrole za dob, glukozu i BMI.
+
+-   **BMI-** koeficijent je vrlo blizu nule i **nije statistički značajan** (p ≈ 0.82). U prisutnosti dobi, glukoze i hipertenzije, BMI **ne doprinosi dodatno** objašnjenju rizika moždanog udara.
+
+### Omjeri izgleda (odds ratio) i interpretacija
+
+Za lakšu interpretaciju izračunavamo **odds ratio (OR)** i njihove 95%-ne intervale pouzdanosti:
+
+```{r}
+or_table <- exp(cbind(OddsRatio = coef(logreg_model),
+confint(logreg_model)))
+or_table
+
+```
+
+Tipično dobijemo rezultate slične sljedećem obrascu:
+
+-   **Dob**\
+    OR ≈ **1.07** (CI otprilike 1.06–1.08): Svako povećanje dobi za 1 godinu povećava šanse moždanog udara za oko **7 %**, uz ostale varijable fiksirane.
+
+-   **Prosječna razina glukoze u krvi**\
+    OR ≈ **1.005** po 1 mg/dL: Na razini pojedinačnih mg/dL učinak je malen, ali na razini razlike od npr. 50 mg/dL to se pretvara u razliku od oko 25–30 %.
+
+-   **Hipertenzija**\
+    OR ≈ **1.7** (CI otprilike 1.2–2.4): Osobe s hipertenzijom imaju otprilike **70 % veće izglede** (odds) za moždani udar u odnosu na osobe bez hipertenzije, pod kontrolom dobi, glukoze i BMI-ja.
+
+-   **BMI**\
+    OR ≈ **1.00**, uz interval pouzdanosti koji obuhvaća 1: Nema uvjerljivog dokaza da BMI samostalno mijenja rizik od moždanog udara nakon što se u model uključe dob, glukoza i hipertenzija.
+
+### Predikcija vjerojatnosti i problem praga 0.5
+
+Model za svakog pacijenta vraća procijenjenu vjerojatnost moždanog udara:
+
+```{r}
+model_data$prob <- predict(logreg_model, type = "response")
+summary(model_data$prob)
+
+```
+
+Standardno pravilo u logističkoj regresiji kaže:
+
+-   Ako je vjerojatnost \>= 0.5 → klasificiramo kao **stroke**
+
+-   Inače = **no_stroke**
+
+Međutim, budući da je moždani udar rijedak događaj (oko 4–5 %), **model gotovo nikome neće dodijeliti vjerojatnost ≥ 0.5**. To znači da bi, s pragom 0.5, **svi bili predviđeni kao “no_stroke”**, što nije korisno.
+
+Distribuciju predikcija po ishodu možemo pogledati ovako:\
+
+```{r}
+ggplot(model_data, aes(x = prob, fill = stroke)) +
+geom_histogram(alpha = 0.6, position = "identity", bins = 40) +
+labs(title = "Distribucija predviđenih vjerojatnosti moždanog udara",
+x = "Predviđena vjerojatnost moždanog udara",
+y = "Broj pacijenata",
+fill = "Stvarni ishod") +
+theme_minimal()
+
+```
+
+Većina predikcija leži ispod 0.1, što je očekivano za rijedak događaj.
+
+### ROC krivulja i AUC – kvaliteta modela
+
+Umjesto da koristimo jedan fiksni prag (npr. 0.5), za evaluaciju modela koristimo **ROC krivulju** i **AUC**.
+
+-   **ROC krivulja** prikazuje omjer **osjetljivosti (sensitivnost)** i **1 − specifičnost** za sve moguće pragove vjerojatnosti.
+-   **AUC** (Area Under the Curve) mjeri ukupnu sposobnost modela da razlikuje pacijente s moždanim udarom od onih bez.
+    -   AUC = 0.5 → model nije bolji od slučajnog pogađanja
+
+    -   AUC = 1 → savršen model
+
+    -   U praksi: 0.7–0.8 “pristojno”, 0.8–0.9 “dobro”.
+
+```{r}
+# za ROC koristimo paket pROC
+
+library(pROC)
+
+roc_obj <- roc(response = model_data$stroke,
+predictor = model_data$prob,
+levels = c("no_stroke", "stroke"))  # redoslijed: kontrola, slučaj
+
+auc(roc_obj)
+
+plot(roc_obj, col = "blue", lwd = 2,
+main = "ROC krivulja logističkog modela")
+abline(a = 0, b = 1, lty = 2, col = "grey")
+
+```
+
+U našem slučaju AUC je približno **0.85**, što znači da model **vrlo dobro razlikuje** pacijente koji su doživjeli moždani udar od onih koji nisu.
+
+Primjer “optimalnog” praga (npr. prema Youdenovom indeksu):
+
+```{r}
+coords(roc_obj, "best",
+ret = c("threshold", "sensitivity", "specificity"))
+
+```
+
+Tipično dobijemo prag oko 0.04, uz:
+
+-   **osjetljivost** ≈ 0.85 (model ispravno “uhvati” oko 85 % moždanih udara
+
+-   **specifičnost** ≈ 0.71 (oko 71 % osoba bez moždanog se ispravno predvidi kao “no_stroke”)
+
+Dakle, ako spustimo prag dovoljno nisko, model može biti **osjetljiv** (dobar u hvatanju rizičnih pacijenata), iako uz određeni broj lažno pozitivnih.
+
+### Vizualizacija učinka dobi i hipertenzije na rizik
+
+Da bismo intuitivno prikazali kako se procijenjena vjerojatnost moždanog udara mijenja s dobi i hipertenzijom, promatramo predikcije za:
+
+-   različitu dob,
+
+-   fiksnu prosječnu glukozu i BMI (medijan),
+
+-   odvojeno po hipertenziji (da / ne).
+
+```{r}
+# grid za dob i hipertenziju
+
+age_grid <- seq(min(model_data$age), max(model_data$age), length.out = 100)
+
+new_age_data <- expand.grid(
+age = age_grid,
+hypertension = levels(model_data$hypertension)
+)
+
+new_age_data$avg_glucose_level <- median(model_data$avg_glucose_level, na.rm = TRUE)
+new_age_data$bmi                <- median(model_data$bmi, na.rm = TRUE)
+
+new_age_data$pred_prob <- predict(logreg_model,
+newdata = new_age_data,
+type = "response")
+
+ggplot(new_age_data,
+aes(x = age, y = pred_prob, color = hypertension)) +
+geom_line(size = 1.1) +
+labs(title = "Predviđena vjerojatnost moždanog udara po dobi",
+subtitle = "Za medijan glukoze i BMI-ja",
+x = "Dob",
+y = "Predviđena vjerojatnost moždanog udara",
+color = "Hipertenzija") +
+theme_minimal()
+
+```
+
+Iz grafa se vidi:
+
+-   rizik moždanog udara **raste s dobi**,
+
+-   za **svaku dob** krivulja za `has_hypertension` leži iznad krivulje za `no_hypertension`,\
+    što potvrđuje da hipertenzija povećava rizik, neovisno o dobi
+
+### Vizualizacija učinka glukoze
+
+Slično možemo pogledati kako razina glukoze utječe na rizik, za “tipičnog” pacijenta (srednja dob, srednji BMI):
+
+```{r}
+glucose_grid <- seq(
+quantile(model_data$avg_glucose_level, 0.01),
+quantile(model_data$avg_glucose_level, 0.99),
+length.out = 100
+)
+
+new_gluc_data <- expand.grid(
+avg_glucose_level = glucose_grid,
+hypertension = levels(model_data$hypertension)
+)
+
+new_gluc_data$age <- median(model_data$age, na.rm = TRUE)
+new_gluc_data$bmi <- median(model_data$bmi, na.rm = TRUE)
+
+new_gluc_data$pred_prob <- predict(logreg_model,
+newdata = new_gluc_data,
+type = "response")
+
+ggplot(new_gluc_data,
+aes(x = avg_glucose_level, y = pred_prob, color = hypertension)) +
+geom_line(size = 1.1) +
+labs(title = "Predviđena vjerojatnost moždanog udara po glukozi",
+subtitle = "Za medijan dobi i BMI-ja",
+x = "Prosječna razina glukoze [mg/dL]",
+y = "Predviđena vjerojatnost moždanog udara",
+color = "Hipertenzija") +
+theme_minimal()
+
+```
+
+Ovdje vidimo da:
+
+-   viša glukoza **povećava vjerojatnost moždanog udara**,
+
+-   ponovno, osobe s hipertenzijom imaju viši rizik za sve razine glukoze
+
+### **Rezultati**
+
+-   U model je uključeno **4909 pacijenata**, od čega je oko **5 %** imalo moždani udar.
+
+-   Statistički značajni prediktori su:
+
+    -   **dob** (stariji pacijenti imaju veći rizik),
+
+    -   **prosječna razina glukoze** (više vrijednosti → veći rizik),
+
+    -   **hipertenzija** (povećava rizik u odnosu na osobe bez hipertenzije).
+
+-   **BMI nije značajan** prediktor kada su ostale varijable uključene u model.
+
+-   Omjeri izgleda pokazuju:
+
+    -   povećanje dobi za 1 godinu povećava izglede za moždani udar,
+
+    -   više glukoze povećava rizik,
+
+    -   hipertenzija povećava izglede za moždani udar za oko 1.5–2 puta.
+
+-   Budući da je moždani udar rijedak događaj, većina predviđenih vjerojatnosti je **manja od 0.1**, pa prag 0.5 nije koristan za klasifikaciju.
+
+-   ROC analiza daje **AUC ≈ 0.85**, što znači da model **dobro razlikuje** pacijente s moždanim udarom od onih bez njega.
+
+-   Dijagrami pokazuju da:
+
+    -   rizik raste s dobi i glukozom,
+
+    -   hipertenzija dodatno povećava rizik,
+
+    -   BMI ne mijenja procijenjenu vjerojatnost na vidljiv način.
+
+### Zaključak
+
+Dobiveni rezultati pokazuju da **dob**, **prosječna razina glukoze u krvi** i **hipertenzija** čine **značajne i klinički opravdane prediktore** rizika od moždanog udara u promatranom skupu podataka. Model logističke regresije na temelju ta tri faktora postiže **dobru diskriminacijsku moć** (AUC ≈ 0.85) i može dobro razlikovati rizične od nerizičnih pacijenata.
+
+S druge strane, **BMI se u ovom modelu ne pokazuje statistički značajnim prediktorom**, što znači da nakon što uzmemo u obzir dob, glukozu i hipertenziju, indeks tjelesne mase ne doprinosi dodatnoj informaciji o riziku moždanog udara. To ne znači da BMI nije važan zdravstveni pokazatelj općenito, nego da u ovoj konkretnoj kombinaciji varijabli i uzorka nema samostalan efekt na ishod.
+
+Važno je naglasiti i da je moždani udar **rijedak događaj**, pa se model ne smije procjenjivati samo prema standardnom pragu 0.5. Primjerenije je koristiti niže pragove, odabrane na temelju ROC krivulje i kliničkih prioriteta (npr. favoriziranje veće osjetljivosti kako bismo “uhvatili” što više rizičnih pacijenata, uz prihvaćanje većeg broja lažno pozitivnih).
+
+Zaključno, u našem uzorku je **moguće predvidjeti vjerojatnost moždanog udara** uz pomoć relativno jednostavnog modela koji koristi dob, glukozu i hipertenziju, dok BMI u prisutnosti ovih varijabli nema značajan doprinos. Ovakav model može poslužiti kao **koristan alat za procjenu rizika** i inicijalno izdvajanje pacijenata kojima bi trebalo posvetiti dodatnu pažnju, ali svakako ne zamjenjuje detaljnu kliničku procjenu i druge relevantne informacije o zdravstvenom stanju pacijenta.
+
+## Postoji li povezanost izmedu statusa pušenja i nastanka moždanog udara?
 
 U analizi se ispituje postoji li povezanost između statusa pušenja i pojave moždanog udara. Prvo se varijable smoking_status i stroke pretvaraju u faktore kako bi se mogle ispravno koristiti u kontingencijskoj tablici i Chi-kvadrat testu.
 
