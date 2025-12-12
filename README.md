@@ -4,7 +4,7 @@
 
 ## ZADANA PITANJA
 
-### Pitanje 1 (izracunato, treba napisati tekst i napraviti dijagrame)
+### Pitanje 1 (gotovo)
 Postoji li statisticki znacajna razlika u prosjecnoj razini glukoze izmedu pacijenata sa i
 bez mozdanog udara?
 
