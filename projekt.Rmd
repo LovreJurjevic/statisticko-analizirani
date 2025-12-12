@@ -182,7 +182,7 @@ prop.table(table(data$Residence_type, useNA = "ifany"))
 
 Većina pacijenata je zaposlena u privatnom sektoru, dok 0,4% njih nikada nije radilo.
 
-Raspodjela između urbane i ruralne sredine u kojoj živi pacijent je gotovo jednolika
+Raspodjela između urbane i ruralne sredine u kojoj živi pacijent je gotovo jednolika.
 
 ```{r}
 mean(data$stroke)
@@ -192,18 +192,30 @@ U nastavku rada nastojat će se pokazati povezanost opisanih atributa s moždani
 
 ### Postoji li statistički značajna razlika u prosječnoj razini glukoze između pacijenata sa i bez moždanog udara?
 
-```{r}
-data_stroke <- data[data$stroke == 1, ]$avg_glucose_level
-data_no_stroke <- data[data$stroke == 0,]$avg_glucose_level
-summary(data_stroke)
-summary(data_no_stroke)
-```
+Potrebno je odrediti postoji li značajna razlika u prosječnoj razini glukoze između pacijenata sa i bez moždanog udara. Započnimo s preciznim određivanjem hipoteza
+- H0: Ne postoji značajna razlika, odnosno: {mean(glucose_stroke) - mean(glucose_no_stroke) = 0}
+- H1: Postoji značajna razlika: {mean(glucose_stroke) - mean(glucose_no_stroke) != 0}
 
 ```{r}
-hist(data$avg_glucose_level, freq = FALSE, col = "lightblue", border = "black")
-curve(dnorm(x, mean(data$avg_glucose_level), sd(data$avg_glucose_level)), add = TRUE, col = "red")
+glucose_stroke <- data[data$stroke == 1, ]$avg_glucose_level
+glucose_no_stroke <- data[data$stroke == 0,]$avg_glucose_level
+summary(glucose_stroke)
+summary(glucose_no_stroke)
+```
+Relativno velika razlika medijana i aritmetičke sredine govori o tome koliko je distribucija količine glukoze zakrivljena. Obe distribucije imaju težak desni rep, a distribucija kod ljudi koji su imali moždani udar se može čak smatrati i bimodalnom. Zbog toga se ne može smatrati normalnom, međutim centralni granični teorem omogućava da se za testiranje hipoteza koristi t-test kad su uzorci veliki. Bez obzira na to provest će se i neparametarska metoda da bi se usporedili rezultati.
+
+```{r}
+hist(glucose_stroke , freq = FALSE, main = "Kolicina glukoze u krvi kod ljudi s mozdanim udarom", xlab = "Kolicina glukoze u krvi [mg/dL]", col = "lavender", border = "black")
+curve(dnorm(x, mean(glucose_stroke), sd(glucose_stroke)), add = TRUE, col = "red")
 
 ```
+```{r}
+result <- t.test(avg_glucose_level ~ stroke, data = data, var.equal = FALSE)
+result
+```
+Welchov t-test za dva uzorka s različitim varijancama odbacuje nultu hipotezu da su dvije sredine jednake, odnosno prihvaća alternativu gdje su sredine različite. To se može vidjeti iz p-vrijednosti koja je jako blizu nuli. Grupa 0 označava ljude koji nisu imali moždani udar i oni očekivano imaju manju prosječnu razinu glukoze u krvi, dok preostala grupa ima gotovo 28 mg/dL više glukoze u krvi. Ta se vrijednost nalazi i u izračunatom intervalu pouzdanosti.
+
+Ukratko odbacuje se nulta hipoteza u korist alternativne hipoteze. Sada ćemo to još jednom provjeriti uz pomoć neparametarske metode bootstrap.
 
 ```{r}
 set.seed(67)
@@ -213,13 +225,13 @@ B <- 10000
 boot_diff <- numeric(B)
 
 for (i in 1:B) {
-  boot_data_stroke <- sample(data_stroke, replace = TRUE)
-  boot_data_no_stroke <- sample(data_no_stroke, replace = TRUE)
-  boot_diff[i] <- mean(boot_data_stroke) - mean(boot_data_no_stroke)
+  boot_stroke <- sample(glucose_stroke, replace = TRUE)
+  boot_no_stroke <- sample(glucose_no_stroke, replace = TRUE)
+  boot_diff[i] <- mean(boot_stroke) - mean(boot_no_stroke)
 }
 
 # Observed mean difference
-obs_diff <- mean(data_stroke) - mean(data_no_stroke)
+obs_diff <- mean(glucose_stroke) - mean(glucose_no_stroke)
 
 # 95% bootstrap confidence interval
 ci <- quantile(boot_diff, c(0.025, 0.975))
@@ -230,10 +242,7 @@ list(
 )
 
 ```
-
-```{r}
-head(data)
-```
+Vidljivo je da interval 95%-ne pouzdanosti odgovara onom izračunatom u Welchovom testu. Neparametarska metoda bootstrap također odbacuje nultu hipotezu u korist alternativne. Korištena je zato što ona ne zahtijeva da skup podataka koji testira bude neke određene distribucije.
 
 ### Postoji li interakcijski učinak hipertenzije i srčanih bolesti na BMI?
 
