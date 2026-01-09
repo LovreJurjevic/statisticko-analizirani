@@ -49,11 +49,23 @@ Iz generiranih prikaza moguće je vidjeti neke od vrijednosti koje poprimaju poj
 
 #### Prikaz demografskih podataka
 
-```{r}
+```{r, fig.align="center", out.width="100%", fig.width=12, fig.height=5}
 par(mfrow = c(1,3))
-hist(data$age , main = "Distribucija dobi", xlab = "Dob", col = "lightblue", border = "black")
-barplot(table(data$gender), main = "Distribucija spola", xlab = "Spol", col = c("pink","lightblue","black"),border="black")
-barplot(table(data$ever_married), main = "Distribucija bracnog statusa", xlab = "Bracni status", col = c("orange","lightblue"),border="black")
+hist(data$age ,
+     main = "Distribucija dobi",
+     xlab = "Dob",
+     col = "lightblue",
+     border = "black")
+barplot(table(data$gender),
+        main = "Distribucija spola",
+        xlab = "Spol",
+        col = c("pink","lightblue","black"),
+        border="black")
+barplot(table(data$ever_married),
+        main = "Distribucija bracnog statusa",
+        xlab = "Bracni status",
+        col = c("orange","lightblue"),
+        border="black")
 
 ```
 
@@ -92,8 +104,16 @@ bmi <- as.numeric(bmi)
 
 ```{r}
 par(mfrow = c(1,2))
-barplot(table(data$hypertension), main = "Distribucija hipertenzije", xlab = "Hipertenzija", col = c("orange","lightblue"),border="black")
-barplot(table(data$heart_disease), main = "Distribucija srcanih bolesti", xlab = "Srcane bolesti", col = c("orange","lightblue"),border="black")
+barplot(table(data$hypertension),
+        main = "Distribucija hipertenzije",
+        xlab = "Hipertenzija",
+        col = c("orange","lightblue"),
+        border="black")
+barplot(table(data$heart_disease),
+        main = "Distribucija srcanih bolesti",
+        xlab = "Srcane bolesti",
+        col = c("orange","lightblue"),
+        border="black")
 
 ```
 
@@ -125,8 +145,15 @@ Sličan rezultat se dobije i sa srčanim bolestima, gdje u uzorku srčanu bolest
 
 ```{r}
 par(mfrow = c(1,2))
-hist(data$avg_glucose_level , main = "Distribucija kolicine glukoze u krvi", xlab = "Kolicina glukoze u krvi [mg/dL]", col = "lavender", border = "black")
-hist(bmi , main = "Distribucija indeksa BMI", xlab = "BMI", col = "aquamarine", border = "black")
+hist(data$avg_glucose_level , main = "Distribucija kolicine glukoze u krvi",
+     xlab = "Kolicina glukoze u krvi [mg/dL]",
+     col = "lavender",
+     border = "black")
+hist(bmi ,
+     main = "Distribucija indeksa BMI",
+     xlab = "BMI", 
+     col = "aquamarine", 
+     border = "black")
 ```
 
 ```{r}
@@ -155,8 +182,12 @@ Nijedna od ove dvije distribucije se ne može smatrati savršeno normalnom.
 
 #### Prikaz podataka o životnim navikama
 
-```{r}
-barplot(table(data$smoking_status), main = "Distribucija statusa pusenja", xlab = "Status pusenja", col = c("orange","lightblue","yellow","lavender"),border="black")
+```{r, fig.align="center", out.width="100%", fig.width=12, fig.height=5}
+barplot(table(data$smoking_status),
+        main = "Distribucija statusa pusenja",
+        xlab = "Status pusenja",
+        col = c("orange","lightblue","yellow","lavender"),
+        border="black")
 ```
 
 ```{r}
@@ -166,13 +197,25 @@ prop.table(table(data$smoking_status, useNA = "ifany"))
 Vidljivo je da za veliki postotak ispitanika, čak preko 30%, nemamo informaciju o njihovom statusu pušenja. Važno je napomenuti da se izbacivanjem zapisa o pacijentima sa statusom pušenja "Unknown" zapravo izbacuju gotovo sva djeca iz skupa podataka. Ipak, u skupu pacijenata s "Unknown" statusom pušenja postoje predstavnici gotovo svih dobnih skupina. Sljedeći histogram prikazuje distribuciju dobi "Unknown" pušača.
 
 ```{r}
-hist(data[data$smoking_status == "Unknown",]$age , main = "Distribucija dobi 'Unknown pusaca'", xlab = "Dob", col = "lightblue", border = "black")
+hist(data[data$smoking_status == "Unknown",]$age ,
+     main = "Distribucija dobi 'Unknown pusaca'",
+     xlab = "Dob", 
+     col = "lightblue",
+     border = "black")
 ```
 
 ```{r}
 par(mfrow = c(1,2))
-barplot(table(data$work_type), main = "Distribucija tipa zaposlenja", xlab = "Tip zaposlenja", col = c("orange","lightblue","yellow","lavender","aquamarine"),border="black")
-barplot(table(data$Residence_type), main = "Distribucija tipa prebivališta", xlab = "Tip prebivališta", col = c("orange","lightblue","yellow","lavender"),border="black")
+barplot(table(data$work_type),
+        main = "Distribucija tipa zaposlenja", 
+        xlab = "Tip zaposlenja", 
+        col = c("orange","lightblue","yellow","lavender","aquamarine"),
+        border="black")
+barplot(table(data$Residence_type),
+        main = "Distribucija tipa prebivališta", 
+        xlab = "Tip prebivališta", 
+        col = c("orange","lightblue","yellow","lavender"),
+        border="black")
 ```
 
 ```{r}
@@ -206,8 +249,15 @@ summary(glucose_no_stroke)
 Relativno velika razlika medijana i aritmetičke sredine govori o tome koliko je distribucija količine glukoze zakrivljena. Obe distribucije imaju težak desni rep, a distribucija kod ljudi koji su imali moždani udar se može čak smatrati i bimodalnom. Zbog toga se ne može smatrati normalnom, međutim centralni granični teorem omogućava da se za testiranje hipoteza koristi t-test kad su uzorci veliki. Bez obzira na to provest će se i neparametarska metoda da kako se usporedili rezultati.
 
 ```{r}
-hist(glucose_stroke , freq = FALSE, main = "Kolicina glukoze u krvi kod ljudi s mozdanim udarom", xlab = "Kolicina glukoze u krvi [mg/dL]", col = "lavender", border = "black")
-curve(dnorm(x, mean(glucose_stroke), sd(glucose_stroke)), add = TRUE, col = "red")
+hist(glucose_stroke , freq = FALSE,
+     main = "Kolicina glukoze u krvi kod ljudi s mozdanim udarom",
+     xlab = "Kolicina glukoze u krvi [mg/dL]",
+     col = "lavender", 
+     border = "black")
+curve(dnorm(x, mean(glucose_stroke), 
+            sd(glucose_stroke)), 
+      add = TRUE,
+      col = "red")
 
 ```
 
@@ -261,8 +311,13 @@ data2 <- read.csv("data.csv", na.strings = "N/A", stringsAsFactors = FALSE)
 ```
 
 ```{r}
-data2$hypertension  <- factor(data2$hypertension, levels = c(0,1), labels = c("no_hypertension","has_hypertension"))
-data2$heart_disease <- factor(data2$heart_disease, levels = c(0,1), labels = c("no_heart_disease","has_heart_disease"))
+data2$hypertension  <- factor(data2$hypertension,
+                              levels = c(0,1),
+                              labels = 
+                                c("no_hypertension","has_hypertension"))
+data2$heart_disease <- factor(data2$heart_disease,
+                              levels = c(0,1), 
+                              labels = c("no_heart_disease","has_heart_disease"))
 
 
 data2$bmi <- as.numeric(data$bmi)
@@ -388,7 +443,11 @@ Analiza varijance pretpostavlja približnu normalnost reziduala i sličnost vari
 rezid <- residuals(test_anova)
 
 par(mfrow = c(1, 2))
-hist(rezid, main = "Residual histogram", xlab = "Residual", col = "lightblue", border = "black")
+hist(rezid,
+     main = "Residual histogram",
+     xlab = "Residual", 
+     col = "lightblue", 
+     border = "black")
 qqnorm(rezid, main = "QQ residual graf")
 qqline(rezid, col = "red")
 par(mfrow = c(1, 1))
