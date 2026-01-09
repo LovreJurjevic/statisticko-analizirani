@@ -16,7 +16,7 @@ library(ggplot2)
 
 ### Motivacija i opis problema
 
-Moždani udar je hitno medicinsko stanje koje nastaje nakon poremećaja cirkulacije u mozgu. U Hrvatskoj je drugi najveći uzrok smrti te prvi najveći uzrok invaliditeta. Rizik od moždanog udara kod pojedine osobe može ovisiti o više faktora pa se u medicini koriste razni modeli za njegovu procjenu. Nije strana ni uporaba alata zasnovanih na umjernoj inteligenciji. Predikcija moždanog udara bitna je za pravovremenu identifikaciju rizika koje omogućava pravovremene mjere prevencije i osvještavanje populacije.
+Moždani udar je hitno medicinsko stanje koje nastaje nakon poremećaja cirkulacije u mozgu. U Hrvatskoj je drugi najveći uzrok smrti te prvi najveći uzrok invaliditeta. Rizik od moždanog udara kod pojedine osobe može ovisiti o više faktora pa se u medicini koriste razni modeli za njegovu procjenu. Nije strana ni uporaba alata zasnovanih na umjetnoj inteligenciji. Predikcija moždanog udara bitna je za pravovremenu identifikaciju rizika koje omogućava pravovremene mjere prevencije i osvještavanje populacije.
 
 ### Opis skupa podataka
 
@@ -176,7 +176,7 @@ cex.main = 1.5, cex.lab = 1.2)
 
 ```
 
-Distribucije atributa vezanih uz razinu glukoze u krvi te BMI imaju sličnost u tome da postoje stršeće vrijednosti. Međutim, razina glukoze krvi je više zakrivljena i to se da očitati iz broja stršećih vrijednosti, ali i pomaka crte medijana u interkvartalnom intervalu.
+Distribucije atributa vezanih uz razinu glukoze u krvi te BMI imaju sličnost u tome da postoje stršeće vrijednosti. Međutim, razina glukoze krvi je više zakrivljena i to se da očitati iz broja stršećih vrijednosti, ali i pomaka crte medijana u interkvartilnom intervalu.
 
 Nijedna od ove dvije distribucije se ne može smatrati savršeno normalnom.
 
@@ -461,7 +461,7 @@ Na temelju ANOVA tablice zaključujemo sljedeće:
 
 -   Glavni učinak hipertenzije na BMI je statistički značajan (F vrijednost je vrlo velika, p \< 0.001), zbog čega možemo zaključiti da osobe s hipertenzijom u prosjeku imaju viši BMI od osoba bez hipertenzije.
 
--   Glavni učinak srčanih bolesti na BMI nije statistički značajan (p-vrijednost je veća od 0.05), pa na ovoj razini značajnosti zaklučujemo da prosječni BMI razlikuje između osoba sa i bez srčane bolesti kada se ostali čimbenici ne uzimaju u obzir.
+-   Glavni učinak srčanih bolesti na BMI nije statistički značajan (p-vrijednost je veća od 0.05), pa na ovoj razini značajnosti zaključujemo da prosječni BMI razlikuje između osoba sa i bez srčane bolesti kada se ostali čimbenici ne uzimaju u obzir.
 
 -   Interakcijski učinak hipertenzije i srčanih bolesti na BMI je statistički značajan (p \< 0.01), zbog čega zaključujemo da se učinak hipertenzije na BMI razlikuje ovisno o tome ima li osoba srčanu bolest.
 
@@ -471,7 +471,7 @@ Iz tablice prosječnih BMI vrijednosti po grupama vidimo da je najviši BMI tipi
 
 U ovom istraživačkom pitanju želimo ispitati možemo li na temelju dobi (age), prosječne razine glukoze u krvi (avg_glucose_level), indeksa tjelesne mase (BMI) i prisutnosti hipertenzije (hypertension) predvidjeti vjerojatnost da je pacijent doživio moždani udar (stroke).
 
-Pošto uzmimamo moždani kao binarnu varijablu (0 = nema moždanog udara, 1 = imao moždani udar), koristimo logističku regresiju kao provjeru i test za ovo pitanje. Logistički model nam daje procjenu:
+Pošto uzimamo moždani kao binarnu varijablu (0 = nema moždanog udara, 1 = imao moždani udar), koristimo logističku regresiju kao provjeru i test za ovo pitanje. Logistički model nam daje procjenu:
 
 #### P ( moždani = 1 \| age , glucose , BMI , hypertension )
 
@@ -535,7 +535,7 @@ par(mfrow = c(1,1))
 
 ```
 
-Iz ovih grafova se već može naslutiti da su **osobe sa moždanim udarom u prosjeku starije** i imaju **višu razinu glukoze**, dok se BMI čini manje izrazito različitim.
+Iz ovih grafova se već može naslutiti da su **osobe s moždanim udarom u prosjeku starije** i imaju **višu razinu glukoze**, dok se BMI čini manje izrazito različitim.
 
 ### Izgradnja logističkog modela
 
@@ -622,7 +622,7 @@ Većina predikcija leži ispod 0.1, što je očekivano za rijedak događaj.
 
 Umjesto da koristimo jedan fiksni prag (npr. 0.5), za evaluaciju modela koristimo **ROC krivulju** i **AUC**.
 
--   **ROC krivulja** prikazuje omjer **osjetljivosti (sensitivnost)** i **1 - specifičnost** za sve moguće pragove vjerojatnosti.
+-   **ROC krivulja** prikazuje omjer **osjetljivosti (senzitivnost)** i **1 - specifičnost** za sve moguće pragove vjerojatnosti.
 -   **AUC** (Area Under the Curve) mjeri ukupnu sposobnost modela da razlikuje pacijente s moždanim udarom od onih bez.
     -   AUC = 0.5 - model nije bolji od slučajnog pogađanja
 
@@ -796,7 +796,7 @@ Važno je naglasiti i da je moždani udar **rijedak događaj**, pa se model ne s
 
 Zaključno, u našem uzorku je **moguće predvidjeti vjerojatnost moždanog udara** uz pomoć relativno jednostavnog modela koji koristi dob, glukozu i hipertenziju, dok BMI u prisutnosti ovih varijabli nema značajan doprinos. Ovakav model može poslužiti kao **koristan alat za procjenu rizika** i inicijalno izdvajanje pacijenata kojima bi trebalo posvetiti dodatnu pažnju, ali svakako ne zamjenjuje detaljnu kliničku procjenu i druge relevantne informacije o zdravstvenom stanju pacijenta.
 
-## Postoji li povezanost izmedu statusa pušenja i nastanka moždanog udara?
+## Postoji li povezanost između statusa pušenja i nastanka moždanog udara?
 
 U analizi se ispituje postoji li povezanost između statusa pušenja i pojave moždanog udara. Prvo se varijable smoking_status i stroke pretvaraju u faktore kako bi se mogle ispravno koristiti u kontingencijskoj tablici i Chi-kvadrat testu.
 
@@ -885,7 +885,7 @@ U drugom pristupu spajaju se kategorije formerly smoked i smokes u jednu zajedni
 
 1.  Osobe koje nikada nisu pušile (never smoked)
 
-2.  Osobe koje su pušile, bez obzira na to puše li trenutno ili su prestale (was smoking/smokes)
+2.  Osobe koje su pušile, bez obzira na to puše li trenutačno ili su prestale (was smoking/smokes)
 
 Ovakva podjela omogućuje ispitivanje temeljnog pitanja: Je li bilo kakva povijest pušenja povezana s pojavom moždanog udara?
 
@@ -908,7 +908,7 @@ nova_tablica <- table(data$smoking_status, data$stroke)
 nova_tablica <- nova_tablica[-4, ]
 
 # Spajamo redove: formerly smoked + smokes
-# (to znači da gledamo osobe koje su ikada pušile – trenutno ili ranije)
+# (to znači da gledamo osobe koje su ikada pušile – trenutačno ili ranije)
 nova_tablica[2,] <- nova_tablica[2, ] + nova_tablica[3, ]
 
 # Brišemo sada već spojen treći red
@@ -942,4 +942,4 @@ barplot(nova_tablica,
         ylab = "Broj pacijenata")
 ```
 
-Kombinirane su kategorije formerly smoked i smokes u jednu skupinu „was smoking/smokes“, a druga skupina su osobe koje nikada nisu pušile. Chi-kvadrat test na ovoj dvodijelnoj tablici također je dao p-vrijednost manju od 0.05, što potvrđuje statistički značajnu razliku u učestalosti moždanog udara između osoba koje nikada nisu pušile i onih koje su ikada pušile (trenutno ili prije).
+Kombinirane su kategorije formerly smoked i smokes u jednu skupinu „was smoking/smokes“, a druga skupina su osobe koje nikada nisu pušile. Chi-kvadrat test na ovoj dvodijelnoj tablici također je dao p-vrijednost manju od 0.05, što potvrđuje statistički značajnu razliku u učestalosti moždanog udara između osoba koje nikada nisu pušile i onih koje su ikada pušile (trenutačno ili prije).
